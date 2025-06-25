@@ -1,3 +1,4 @@
+import { Popup } from "@/components/modals/popUp";
 import { localSdkVersion } from "@/components/version/version";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useRef, useState } from "react";
@@ -45,6 +46,7 @@ const miniApps: MiniApp[] = [
 const MiniAppIcons: React.FC = () => {
   const webviewRef = useRef<WebView>(null);
   const [selectedUrl, setSelectedUrl] = useState<string | null>(null);
+  const [showPopup, setShowPopup] = useState(false);
 
   const handleMessage = async (event: WebViewMessageEvent) => {
     const rawMessage = event.nativeEvent.data;
@@ -73,6 +75,8 @@ const MiniAppIcons: React.FC = () => {
 
       case "init":
         console.log("Initializing app...");
+        // 👇 Show your popup now
+        setShowPopup(true);
         // version is the version of the Sporran SDK.
         const incomingVersion = data.payload.version;
 
@@ -148,6 +152,7 @@ const MiniAppIcons: React.FC = () => {
   `;
 
   return (
+    
     <View style={{ flex: 1 }}>
       <FlatList
         data={miniApps}
@@ -164,6 +169,8 @@ const MiniAppIcons: React.FC = () => {
           </TouchableOpacity>
         )}
       />
+      <Popup visible={showPopup} onClose={() => setShowPopup(false)} />
+
 
       <Modal visible={!!selectedUrl} animationType="slide">
         <View style={{ flex: 1 }}>
@@ -185,7 +192,7 @@ const MiniAppIcons: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
+    padding: 1,
     justifyContent: "center",
   },
   item: {
