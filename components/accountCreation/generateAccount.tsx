@@ -2,6 +2,7 @@ import * as Kilt from "@kiltprotocol/sdk-js";
 import type { MultibaseKeyPair } from "@kiltprotocol/types";
 import { Keyring } from "@polkadot/keyring/cjs/keyring";
 import type { KeyringPair } from "@polkadot/keyring/types";
+import { mnemonicGenerate } from "@polkadot/util-crypto";
 
 interface GeneratedAccounts {
   // issuerAccount: MultibaseKeyPair;
@@ -15,8 +16,7 @@ interface GeneratedAccounts {
 export function generateAccounts(holdMnemonic?: string): GeneratedAccounts {
   const keyring = new Keyring({ type: 'sr25519', ss58Format: 38 }); 
 
-  // const holderMnemonic = mnemonicGenerate();
-  const holderMnemonic = "ignore response magic carbon leopard dune embrace lottery slight viable fiction oven";
+  const holderMnemonic = mnemonicGenerate();
   console.log("Holder Mnemonic:", holderMnemonic);
   const derivation='//did//0';
   console.log("Derivation path:", derivation);
