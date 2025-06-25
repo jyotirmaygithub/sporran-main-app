@@ -94,15 +94,26 @@ const MiniAppIcons: React.FC = () => {
         if (localSdkVersion === incomingVersion) {
           const did = await AsyncStorage.getItem("userDID");
           const web3Name = await AsyncStorage.getItem("userWeb3Name");
+          console.log("DID:", did);
+          console.log("Web3Name:", web3Name);
+          const payload = {
+            status: "success",
+            did: did || null,
+            web3Name: web3Name || null,
+          };
 
           console.log("✅ SDK versions match. Sending identity back.");
-          webviewRef.current?.postMessage(
-            JSON.stringify({
-              status: "success",
-              did: did || null,
-              web3Name: web3Name || null,
-            })
-          );
+          const jsCode = `alert("hello world")`;
+
+          webviewRef.current?.injectJavaScript(jsCode);
+
+          // webviewRef.current?.postMessage(
+          //   JSON.stringify({
+          //     status: "success",
+          //     did: did || null,
+          //     web3Name: web3Name || null,
+          //   })
+          // );
         } else {
           console.warn("❌ SDK version mismatch");
           webviewRef.current?.postMessage(
