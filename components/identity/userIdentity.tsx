@@ -35,10 +35,24 @@ export function MainAppUserDID() {
 
       console.log("✅ Faucet submitter address:", submitter);
 
-      let { holderAccount, holderMnemonic, holderWallet } = generateAccounts();
+      const result = await generateAccounts();
+      if (result.resolvedDid && result.web3Name) {
+        console.log("✅ Existing identity found");
+        setDidUri(result.resolvedDid);
+        setWeb3Name(result.web3Name);
+        await AsyncStorage.setItem("userDID", result.resolvedDid);
+        await AsyncStorage.setItem("userWeb3Name", result.web3Name);
+        return;
+      }
+
+      let { holderAccount, holderMnemonic, holderWallet } = result;
       console.log("✅ Holder account generated:", holderAccount);
       console.log("✅ Holder mnemonic:", holderMnemonic);
       console.log("✅ Holder wallet address:", holderWallet);
+
+      if (!holderAccount) {
+        throw new Error("❌ Holder account is undefined.");
+      }
 
       const holderDidResponse = await generateDid(holderAccount, submitter);
       console.log("✅ Holder DID generated:", holderDidResponse);
@@ -50,6 +64,10 @@ export function MainAppUserDID() {
         holderDidResponse.signers,
         submitter
       );
+
+      if (!holderMnemonic) {
+        throw new Error("❌ Holder Mnemonic is undefined.");
+      }
 
       await AsyncStorage.setItem("userMnemonic", holderMnemonic);
       await AsyncStorage.setItem("signers", holderDidResponse.signers.toString());

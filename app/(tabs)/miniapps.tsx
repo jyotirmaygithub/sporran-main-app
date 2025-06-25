@@ -26,7 +26,7 @@ const miniApps: MiniApp[] = [
     id: "1",
     name: "Chat",
     icon: "https://img.icons8.com/color/96/chat.png",
-    url: "https://f7c8-125-23-171-6.ngrok-free.app/",
+    url: "https://a08b-125-23-171-6.ngrok-free.app/",
   },
   {
     id: "2",
@@ -107,9 +107,8 @@ const MiniAppIcons: React.FC = () => {
           console.warn("❌ SDK version mismatch");
           webviewRef.current?.postMessage(
             JSON.stringify({
-              status: "version_mismatch",
-              expectedVersion: localSdkVersion,
-              receivedVersion: incomingVersion,
+              status: "error",
+              message: "SDK version mismatch",
             })
           );
         }
