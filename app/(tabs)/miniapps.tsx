@@ -1,7 +1,18 @@
-import React, { useState } from 'react';
-import { Alert, Button, FlatList, Image, Modal, PermissionsAndroid, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { launchCamera } from 'react-native-image-picker';
-import { WebView, WebViewMessageEvent } from 'react-native-webview';
+import { localSdkVersion } from "@/components/version/version";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, { useRef, useState } from "react";
+import {
+  Alert,
+  Button,
+  FlatList,
+  Image,
+  Modal,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { WebView, WebViewMessageEvent } from "react-native-webview";
 
 type MiniApp = {
   id: string;
@@ -11,91 +22,111 @@ type MiniApp = {
 };
 
 const miniApps: MiniApp[] = [
-  { id: '1', name: 'Chat', icon: 'https://img.icons8.com/color/96/chat.png', url: 'https://f7c8-125-23-171-6.ngrok-free.app/' },
-  { id: '2', name: 'Weather', icon: 'https://img.icons8.com/color/96/partly-cloudy-day.png', url: 'https://weather0004.netlify.app/' },
-  { id: '3', name: 'Music', icon: 'https://img.icons8.com/color/96/musical-notes.png', url: 'https://example.com/music' },
+  {
+    id: "1",
+    name: "Chat",
+    icon: "https://img.icons8.com/color/96/chat.png",
+    url: "https://f7c8-125-23-171-6.ngrok-free.app/",
+  },
+  {
+    id: "2",
+    name: "Weather",
+    icon: "https://img.icons8.com/color/96/partly-cloudy-day.png",
+    url: "https://weather0004.netlify.app/",
+  },
+  {
+    id: "3",
+    name: "Music",
+    icon: "https://img.icons8.com/color/96/musical-notes.png",
+    url: "https://example.com/music",
+  },
 ];
 
 const MiniAppIcons: React.FC = () => {
+  const webviewRef = useRef<WebView>(null);
   const [selectedUrl, setSelectedUrl] = useState<string | null>(null);
 
-  const requestCameraPermission = async (): Promise<boolean> => {
-  if (Platform.OS === 'android') {
-    try {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.CAMERA,
-        {
-          title: 'Camera Permission',
-          message: 'This app needs access to your camera to take photos.',
-          buttonNeutral: 'Ask Me Later',
-          buttonNegative: 'Cancel',
-          buttonPositive: 'OK',
-        }
-      );
-      return granted === PermissionsAndroid.RESULTS.GRANTED;
-    } catch (err) {
-      console.warn('Permission error:', err);
-      return false;
-    }
-  }
-  // iOS permissions are handled automatically by the image picker
-  return true;
-};
-
   const handleMessage = async (event: WebViewMessageEvent) => {
-  const rawMessage = event.nativeEvent.data;
-  console.log('Received from WebView:', rawMessage);
+    const rawMessage = event.nativeEvent.data;
+    console.log("Received from WebView:", rawMessage);
 
-  let data;
-  try {
-    data = typeof rawMessage === 'string' ? JSON.parse(rawMessage) : rawMessage;
-  } catch (err) {
-    console.error('Invalid JSON from WebView:', err);
-    Alert.alert('Invalid Message', 'Could not parse message from WebView');
-    return;
-  }
+    let data;
+    try {
+      data =
+        typeof rawMessage === "string" ? JSON.parse(rawMessage) : rawMessage;
+    } catch (err) {
+      console.error("Invalid JSON from WebView:", err);
+      Alert.alert("Invalid Message", "Could not parse message from WebView");
+      return;
+    }
 
-  if (!data?.command) {
-    Alert.alert('Missing Command', 'WebView message missing "command" field');
-    return;
-  }
+    if (!data?.command) {
+      Alert.alert("Missing Command", 'WebView message missing "command" field');
+      return;
+    }
 
-  switch (data.command) {
-    case 'camera':
-      console.log('Launching camera...');
-      const hasPermission = await requestCameraPermission();
-      if (!hasPermission) {
-        Alert.alert('Permission Denied', 'Camera permission is required to take photos.');
-        return;
-      }
-      launchCamera(
-        {
-          mediaType: 'photo',
-          cameraType: 'back',
-          saveToPhotos: true,
-          includeBase64: false,
-        },
-        (response) => {
-          if (response.didCancel) {
-            console.log('User cancelled camera');
-          } else if (response.errorCode) {
-            console.error('Camera Error:', response.errorMessage);
-            Alert.alert('Camera Error', response.errorMessage || 'Unknown error');
-          } else {
-            console.log('Camera Response:', response.assets);
-            Alert.alert('Photo Captured', JSON.stringify(response.assets, null, 2));
-          }
+    switch (data.command) {
+      case "pay":
+        console.log("Initiating payment...");
+        // Add pay logic if needed
+        break;
+
+      case "init":
+        console.log("Initializing app...");
+        // version is the version of the Sporran SDK.
+        const incomingVersion = data.payload.version;
+
+        if (!incomingVersion) {
+          console.warn("No SDK version provided in request.");
+          webviewRef.current?.postMessage(
+            JSON.stringify({
+              status: "error",
+              message: "No SDK version provided in request.",
+            })
+          );
+          break;
         }
-      );
-      break;
 
-    default:
-      console.warn('Unknown command from WebView:', data.command);
-      Alert.alert('WebView Message', `Unknown command: ${data.command}`);
-      break;
-  }
-};
-const injectedJS = `
+        console.log(
+          `Local SDK Version: ${localSdkVersion}, Incoming SDK Version: ${incomingVersion}`
+        );
+
+        if (localSdkVersion === incomingVersion) {
+          const did = await AsyncStorage.getItem("userDID");
+          const web3Name = await AsyncStorage.getItem("userWeb3Name");
+
+          console.log("✅ SDK versions match. Sending identity back.");
+          webviewRef.current?.postMessage(
+            JSON.stringify({
+              status: "success",
+              did: did || null,
+              web3Name: web3Name || null,
+            })
+          );
+        } else {
+          console.warn("❌ SDK version mismatch");
+          webviewRef.current?.postMessage(
+            JSON.stringify({
+              status: "version_mismatch",
+              expectedVersion: localSdkVersion,
+              receivedVersion: incomingVersion,
+            })
+          );
+        }
+        break;
+
+      default:
+        console.warn("Unknown command from WebView:", data.command);
+        webviewRef.current?.postMessage(
+          JSON.stringify({
+            status: "unknown_command",
+            command: data.command,
+          })
+        );
+        break;
+    }
+  };
+  const injectedJS = `
     window.SporranApp = {
       device_os: 'expo',
       version: '1.0.0',
@@ -106,8 +137,6 @@ const injectedJS = `
     true; // required for Android to apply the JS
   `;
 
-
-
   return (
     <View style={{ flex: 1 }}>
       <FlatList
@@ -116,7 +145,10 @@ const injectedJS = `
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.container}
         renderItem={({ item }) => (
-          <TouchableOpacity style={styles.item} onPress={() => setSelectedUrl(item.url)}>
+          <TouchableOpacity
+            style={styles.item}
+            onPress={() => setSelectedUrl(item.url)}
+          >
             <Image source={{ uri: item.icon }} style={styles.icon} />
             <Text style={styles.label}>{item.name}</Text>
           </TouchableOpacity>
@@ -144,10 +176,10 @@ const injectedJS = `
 const styles = StyleSheet.create({
   container: {
     padding: 16,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   item: {
-    alignItems: 'center',
+    alignItems: "center",
     margin: 12,
   },
   icon: {
@@ -157,7 +189,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: "500",
   },
 });
 
