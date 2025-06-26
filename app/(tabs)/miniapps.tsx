@@ -1,4 +1,5 @@
 import { Popup } from "@/components/modals/popUp";
+import { paymentProcessing } from "@/components/payment/paymentProcessing";
 import { localSdkVersion } from "@/components/version/version";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useRef, useState } from "react";
@@ -70,7 +71,49 @@ const MiniAppIcons: React.FC = () => {
     switch (data.command) {
       case "pay":
         console.log("Initiating payment...");
-        // Add pay logic if needed
+        // Example: Extract payment details from data.payload
+        const { amount, to, tip, fee, network, token_symbol, description } =
+          data.payload || {};
+
+        if (
+          !amount ||
+          !to ||
+          !tip ||
+          !fee ||
+          !network ||
+          !token_symbol ||
+          !description
+        ) {
+          console.warn("Payment request missing amount or recipient.");
+          webviewRef.current?.postMessage(
+            JSON.stringify({
+              status: "error",
+              message: "Payment request missing amount or recipient.",
+            })
+          );
+          break;
+        }
+
+        try {
+          // 👉 Add your payment processing logic here
+          console.log(`Processing payment of ${amount} to ${to}...`);
+          paymentProcessing(amount, to, tip);
+          // Simulate successful payment
+          webviewRef.current?.postMessage(
+            JSON.stringify({
+              status: "success",
+              message: `Payment of ${amount} to ${to} processed successfully.`,
+            })
+          );
+        } catch (error) {
+          console.error("Payment failed:", error);
+          webviewRef.current?.postMessage(
+            JSON.stringify({
+              status: "error",
+              message: "Payment processing failed.",
+            })
+          );
+        }
         break;
 
       case "init":
@@ -107,17 +150,17 @@ const MiniAppIcons: React.FC = () => {
           };
 
           console.log("✅ SDK versions match. Sending identity back.");
-          const jsCode = `alert("hello world")`;
+          const jsCode = `alert("hello world"); true;`;
 
           webviewRef.current?.injectJavaScript(jsCode);
 
-          // webviewRef.current?.postMessage(
-          //   JSON.stringify({
-          //     status: "success",
-          //     did: did || null,
-          //     web3Name: web3Name || null,
-          //   })
-          // );
+          webviewRef.current?.postMessage(
+            JSON.stringify({
+              status: "success",
+              did: did || null,
+              web3Name: web3Name || null,
+            })
+          );
         } else {
           console.warn("❌ SDK version mismatch");
           webviewRef.current?.postMessage(
@@ -152,7 +195,6 @@ const MiniAppIcons: React.FC = () => {
   `;
 
   return (
-    
     <View style={{ flex: 1 }}>
       <FlatList
         data={miniApps}
@@ -170,7 +212,6 @@ const MiniAppIcons: React.FC = () => {
         )}
       />
       <Popup visible={showPopup} onClose={() => setShowPopup(false)} />
-
 
       <Modal visible={!!selectedUrl} animationType="slide">
         <View style={{ flex: 1 }}>
