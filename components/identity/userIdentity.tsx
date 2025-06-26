@@ -9,6 +9,7 @@ import { claimWeb3Name } from "../web3name/claimweb3name";
 export function MainAppUserDID() {
   const [didUri, setDidUri] = useState<string | null>(null);
   const [web3Name, setWeb3Name] = useState<string | null>(null);
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
 
   const setupUserIdentity = async () => {
     try {
@@ -69,9 +70,18 @@ export function MainAppUserDID() {
         throw new Error("❌ Holder Mnemonic is undefined.");
       }
 
+      if (!holderWallet) {
+        throw new Error("❌ Holder address is undefined.");
+      }
+
+      console.log("storing new user into the lcoal storage");
       await AsyncStorage.setItem("userMnemonic", holderMnemonic);
-      await AsyncStorage.setItem("signers", holderDidResponse.signers.toString());
+      await AsyncStorage.setItem(
+        "signers",
+        holderDidResponse.signers.toString()
+      );
       await AsyncStorage.setItem("userDID", holderDidResponse.didDocument.id);
+      await AsyncStorage.setItem("walletAddress", holderWallet.address);
       await AsyncStorage.setItem("userWeb3Name", username);
 
       setDidUri(holderDidResponse.didDocument.id);
@@ -85,9 +95,11 @@ export function MainAppUserDID() {
     const loadStoredIdentity = async () => {
       const storedDID = await AsyncStorage.getItem("userDID");
       const storedWeb3Name = await AsyncStorage.getItem("userWeb3Name");
+      const walletAddress = await AsyncStorage.getItem("walletAddress");
 
       if (storedDID) setDidUri(storedDID);
       if (storedWeb3Name) setWeb3Name(storedWeb3Name);
+      if (walletAddress) setWalletAddress(walletAddress);
     };
 
     loadStoredIdentity();
@@ -95,9 +107,14 @@ export function MainAppUserDID() {
 
   return (
     <View style={{ padding: 20 }}>
-      <Text style={{color:  "white",  marginBottom: 10 }}>DID: {didUri || "Not generated"}</Text>
+      <Text style={{ color: "white", marginBottom: 10 }}>
+        DID: {didUri || "Not generated"}
+      </Text>
       <Text style={{ color: "white", marginBottom: 10 }}>
         Web3Name: {web3Name || "Not registered"}
+      </Text>
+      <Text style={{ color: "white", marginBottom: 10 }}>
+        walletAddress: {walletAddress || "Not registered"}
       </Text>
       <Button title="Setup Identity" onPress={setupUserIdentity} />
     </View>
