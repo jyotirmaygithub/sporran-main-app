@@ -1,4 +1,4 @@
-import React from "react";
+import React from "react"; //popup.tsx
 import {
   Dimensions,
   Modal,
@@ -11,24 +11,33 @@ import {
 const { width } = Dimensions.get("window");
 
 export const Popup = ({
-  visible,
-  onClose,
-  message = "🎉 Init completed successfully!",
+  showPopup,
+  onResult,
+  message = "Authenticate the app!",
 }: {
-  visible: boolean;
-  onClose: () => void;
+  showPopup: boolean;
+  onResult: (isAuthenticated: boolean) => void;
   message?: string;
 }) => (
   <Modal
-    visible={visible}
+    visible={showPopup}
     transparent
     animationType="fade"
-    onRequestClose={onClose}
+    onRequestClose={() => onResult(false)}
   >
     <View style={styles.container}>
       <View style={styles.popup}>
         <Text style={styles.message}>{message}</Text>
-        <TouchableOpacity style={styles.button} onPress={onClose}>
+        <TouchableOpacity
+          style={[styles.button, styles.authButton]}
+          onPress={() => onResult(true)}
+        >
+          <Text style={styles.buttonText}>Authenticate</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.button, styles.closeButton]}
+          onPress={() => onResult(false)}
+        >
           <Text style={styles.buttonText}>Close</Text>
         </TouchableOpacity>
       </View>
@@ -57,11 +66,17 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   button: {
-    backgroundColor: "#4CAF50",
     paddingVertical: 15,
     paddingHorizontal: 40,
     borderRadius: 10,
     width: "100%",
+    marginTop: 10,
+  },
+  authButton: {
+    backgroundColor: "#4CAF50",
+  },
+  closeButton: {
+    backgroundColor: "#f44336",
   },
   buttonText: {
     color: "#fff",
