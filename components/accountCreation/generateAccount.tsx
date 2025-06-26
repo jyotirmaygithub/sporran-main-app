@@ -3,7 +3,6 @@ import type { MultibaseKeyPair } from "@kiltprotocol/types";
 import * as kiltUtils from "@kiltprotocol/utils";
 import { Keyring } from "@polkadot/keyring/cjs/keyring";
 import type { KeyringPair } from "@polkadot/keyring/types";
-import { mnemonicGenerate } from "@polkadot/util-crypto";
 
 interface GeneratedAccounts {
   holderAccount?: MultibaseKeyPair;
@@ -23,7 +22,8 @@ export async function generateAccounts(
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const did_1 = require("@kiltprotocol/did");
 
-  const holderMnemonic = mnemonicGenerate();
+  // const holderMnemonic = mnemonicGenerate();
+  const holderMnemonic = "dice mixed stereo bunker ancient elbow ride online expect doctor deposit message";
   console.log("Holder Mnemonic:", holderMnemonic);
 
   const authKeypair = kiltUtils.Crypto.makeKeypairFromUri(
