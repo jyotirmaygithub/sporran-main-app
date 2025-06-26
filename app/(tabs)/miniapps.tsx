@@ -27,7 +27,7 @@ const miniApps: MiniApp[] = [
     id: "1",
     name: "Chat",
     icon: "https://img.icons8.com/color/96/chat.png",
-    url: "https://a08b-125-23-171-6.ngrok-free.app/",
+    url: "https://miniapp-orcin-sigma.vercel.app/"
   },
   {
     id: "2",
@@ -43,10 +43,88 @@ const miniApps: MiniApp[] = [
   },
 ];
 
+const AUTHENTICATED_APPS_KEY = "authenticatedApps";
+
 const MiniAppIcons: React.FC = () => {
   const webviewRef = useRef<WebView>(null);
   const [selectedUrl, setSelectedUrl] = useState<string | null>(null);
   const [showPopup, setShowPopup] = useState(false);
+  const [pendingInitData, setPendingInitData] = useState<any>(null);
+
+  // Helper function to get authenticated apps from local storage
+  const getAuthenticatedApps = async (): Promise<string[]> => {
+    try {
+      const authenticatedApps = await AsyncStorage.getItem(AUTHENTICATED_APPS_KEY);
+      return authenticatedApps ? JSON.parse(authenticatedApps) : [];
+    } catch (error) {
+      console.error("Error getting authenticated apps:", error);
+      return [];
+    }
+  };
+
+  // Helper function to add app to authenticated apps list
+  const addAuthenticatedApp = async (appId: string): Promise<void> => {
+    try {
+      const authenticatedApps = await getAuthenticatedApps();
+      if (!authenticatedApps.includes(appId)) {
+        authenticatedApps.push(appId);
+        await AsyncStorage.setItem(AUTHENTICATED_APPS_KEY, JSON.stringify(authenticatedApps));
+        console.log(`App ${appId} added to authenticated apps list`);
+      }
+    } catch (error) {
+      console.error("Error adding authenticated app:", error);
+    }
+  };
+
+
+  // Helper function to check if app is authenticated
+  const isAppAuthenticated = async (appId: string): Promise<boolean> => {
+    try {
+      const authenticatedApps = await getAuthenticatedApps();
+      return authenticatedApps.includes(appId);
+    } catch (error) {
+      console.error("Error checking app authentication:", error);
+      return false;
+    }
+  };
+
+  const sendInitResponse = async (authResult: boolean, initData: any) => {
+    if (authResult) {
+      const did = await AsyncStorage.getItem("userDID");
+      const web3Name = await AsyncStorage.getItem("userWeb3Name");
+      console.log("DID:", did);
+      console.log("Web3Name:", web3Name);
+
+      // Store the app ID in authenticated apps list
+      if (initData?.payload?.appid) {
+        await addAuthenticatedApp(initData.payload.appid);
+      }
+
+      const response_payload = {
+        status: "success",
+        did: did || null,
+        web3Name: web3Name || null,
+      };
+
+      console.log("✅ SDK versions match and user authenticated. Sending identity back.");
+
+      const jsCode = `
+        window.MiniKit.trigger('init', ${JSON.stringify(response_payload)});
+        true;
+      `;
+      webviewRef.current?.injectJavaScript(jsCode);
+    } else {
+      const response_payload = {
+        status: "error",
+        message: `You must authenticate the app before using it.`,
+      };
+      const jsCode = `
+        window.MiniKit.trigger('init', ${JSON.stringify(response_payload)});
+        true;
+      `;
+      webviewRef.current?.injectJavaScript(jsCode);
+    }
+  };
 
   const handleMessage = async (event: WebViewMessageEvent) => {
     const rawMessage = event.nativeEvent.data;
@@ -75,71 +153,77 @@ const MiniAppIcons: React.FC = () => {
 
       case "init":
         console.log("Initializing app...");
-        // 👇 Show your popup now
-        setShowPopup(true);
         // version is the version of the Sporran SDK.
         const incomingVersion = data.payload.version;
+        const appId = data.payload.appid;
 
         if (!incomingVersion) {
           console.warn("No SDK version provided in request.");
-          webviewRef.current?.postMessage(
-            JSON.stringify({
-              status: "error",
-              message: "No SDK version provided in request.",
-            })
-          );
+          const response_payload = {
+            status: "error",
+            message: `No SDK version provided in request.`,
+          };
+          const jsCode = `
+                        window.MiniKit.trigger('init', ${JSON.stringify(response_payload)});
+                        true;
+                    `;
+          webviewRef.current?.injectJavaScript(jsCode);
+          break;
+        }
+
+        if (appId === "unknown-app-id") {
+          console.warn("No app ID provided in request.");
+          const response_payload = {
+            status: "error",
+            message: `No app ID provided in request.`,
+          };
+          const jsCode = `
+                        window.MiniKit.trigger('init', ${JSON.stringify(response_payload)});
+                        true;
+                    `;
+          webviewRef.current?.injectJavaScript(jsCode);
           break;
         }
 
         console.log(
-          `Local SDK Version: ${localSdkVersion}, Incoming SDK Version: ${incomingVersion}`
+          `Local SDK Version: ${localSdkVersion}, Incoming SDK Version: ${incomingVersion}, App ID: ${appId}`
         );
 
         if (localSdkVersion === incomingVersion) {
-          const did = await AsyncStorage.getItem("userDID");
-          const web3Name = await AsyncStorage.getItem("userWeb3Name");
-          console.log("DID:", did);
-          console.log("Web3Name:", web3Name);
-          const payload = {
-            status: "success",
-            did: did || null,
-            web3Name: web3Name || null,
-          };
+          // Check if this specific app is already authenticated
+          const isAuthenticated = await isAppAuthenticated(appId);
 
-          console.log("✅ SDK versions match. Sending identity back.");
-          const jsCode = `alert("hello world")`;
-
-          webviewRef.current?.injectJavaScript(jsCode);
-
-          // webviewRef.current?.postMessage(
-          //   JSON.stringify({
-          //     status: "success",
-          //     did: did || null,
-          //     web3Name: web3Name || null,
-          //   })
-          // );
+          if (isAuthenticated) {
+            // App is already authenticated, send success response immediately
+            console.log(`✅ App ${appId} is already authenticated`);
+            await sendInitResponse(true, data);
+          } else {
+            // App needs to authenticate, show popup and store init data
+            console.log(`🔐 App ${appId} needs authentication`);
+            setPendingInitData(data);
+            setShowPopup(true);
+          }
         } else {
           console.warn("❌ SDK version mismatch");
-          webviewRef.current?.postMessage(
-            JSON.stringify({
-              status: "error",
-              message: "SDK version mismatch",
-            })
-          );
+          const response_payload = {
+            status: "error",
+            message: `SDK version mismatch. Expected ${localSdkVersion}, but got ${incomingVersion}.`,
+          };
+          const jsCode = `
+            window.MiniKit.trigger('init', ${JSON.stringify(response_payload)});
+            true;
+          `;
+          webviewRef.current?.injectJavaScript(jsCode);
         }
         break;
 
       default:
         console.warn("Unknown command from WebView:", data.command);
-        webviewRef.current?.postMessage(
-          JSON.stringify({
-            status: "unknown_command",
-            command: data.command,
-          })
-        );
+        alert("Unknown command received: " + data.command);
         break;
     }
   };
+
   const injectedJS = `
     window.SporranApp = {
       device_os: 'expo',
@@ -151,8 +235,11 @@ const MiniAppIcons: React.FC = () => {
     true; // required for Android to apply the JS
   `;
 
+  const handleLoadEnd = () => {
+    console.log("WebView has finished loading.");
+  };
+
   return (
-    
     <View style={{ flex: 1 }}>
       <FlatList
         data={miniApps}
@@ -169,19 +256,31 @@ const MiniAppIcons: React.FC = () => {
           </TouchableOpacity>
         )}
       />
-      <Popup visible={showPopup} onClose={() => setShowPopup(false)} />
+      <Popup
+        showPopup={showPopup}
+        onResult={async (result) => {
+          setShowPopup(false);
 
+          // If there's pending init data, process it now with the auth result
+          if (pendingInitData) {
+            await sendInitResponse(result, pendingInitData);
+            setPendingInitData(null);
+          }
+        }}
+      />
 
       <Modal visible={!!selectedUrl} animationType="slide">
         <View style={{ flex: 1 }}>
           <Button title="Close" onPress={() => setSelectedUrl(null)} />
           {selectedUrl && (
             <WebView
+              ref={webviewRef}
               source={{ uri: selectedUrl }}
               style={{ flex: 1 }}
               onMessage={handleMessage}
               injectedJavaScriptBeforeContentLoaded={injectedJS}
-              javaScriptEnabled
+              javaScriptEnabled={true}
+              onLoadEnd={handleLoadEnd}
             />
           )}
         </View>
