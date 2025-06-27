@@ -40,7 +40,7 @@ const miniApps: MiniApp[] = [
     id: "3",
     name: "Music",
     icon: "https://img.icons8.com/color/96/musical-notes.png",
-    url: "https://example.com/music",
+    url: "https://d6b1-2409-4055-29c-3e50-12a7-f7bf-6be4-54ff.ngrok-free.app/",
   },
 ];
 
