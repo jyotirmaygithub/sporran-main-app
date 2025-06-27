@@ -28,7 +28,7 @@ const miniApps: MiniApp[] = [
     id: "1",
     name: "Chat",
     icon: "https://img.icons8.com/color/96/chat.png",
-    url: "https://miniapp-orcin-sigma.vercel.app/"
+    url: "https://miniapp-orcin-sigma.vercel.app/",
   },
   {
     id: "2",
@@ -55,7 +55,9 @@ const MiniAppIcons: React.FC = () => {
   // Helper function to get authenticated apps from local storage
   const getAuthenticatedApps = async (): Promise<string[]> => {
     try {
-      const authenticatedApps = await AsyncStorage.getItem(AUTHENTICATED_APPS_KEY);
+      const authenticatedApps = await AsyncStorage.getItem(
+        AUTHENTICATED_APPS_KEY
+      );
       return authenticatedApps ? JSON.parse(authenticatedApps) : [];
     } catch (error) {
       console.error("Error getting authenticated apps:", error);
@@ -69,14 +71,16 @@ const MiniAppIcons: React.FC = () => {
       const authenticatedApps = await getAuthenticatedApps();
       if (!authenticatedApps.includes(appId)) {
         authenticatedApps.push(appId);
-        await AsyncStorage.setItem(AUTHENTICATED_APPS_KEY, JSON.stringify(authenticatedApps));
+        await AsyncStorage.setItem(
+          AUTHENTICATED_APPS_KEY,
+          JSON.stringify(authenticatedApps)
+        );
         console.log(`App ${appId} added to authenticated apps list`);
       }
     } catch (error) {
       console.error("Error adding authenticated app:", error);
     }
   };
-
 
   // Helper function to check if app is authenticated
   const isAppAuthenticated = async (appId: string): Promise<boolean> => {
@@ -107,7 +111,9 @@ const MiniAppIcons: React.FC = () => {
         web3Name: web3Name || null,
       };
 
-      console.log("✅ SDK versions match and user authenticated. Sending identity back.");
+      console.log(
+        "✅ SDK versions match and user authenticated. Sending identity back."
+      );
 
       const jsCode = `
         window.MiniKit.trigger('init', ${JSON.stringify(response_payload)});
@@ -207,7 +213,9 @@ const MiniAppIcons: React.FC = () => {
             message: `No SDK version provided in request.`,
           };
           const jsCode = `
-                        window.MiniKit.trigger('init', ${JSON.stringify(response_payload)});
+                        window.MiniKit.trigger('init', ${JSON.stringify(
+                          response_payload
+                        )});
                         true;
                     `;
           webviewRef.current?.injectJavaScript(jsCode);
@@ -221,9 +229,12 @@ const MiniAppIcons: React.FC = () => {
             message: `No app ID provided in request.`,
           };
           const jsCode = `
-                        window.MiniKit.trigger('init', ${JSON.stringify(response_payload)});
+                        window.MiniKit.trigger('init', ${JSON.stringify(
+                          response_payload
+                        )});
                         true;
                     `;
+          // injects and runs JavaScript inside the WebView’s web page.
           webviewRef.current?.injectJavaScript(jsCode);
           break;
         }

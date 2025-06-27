@@ -1,5 +1,6 @@
 import "react-native-get-random-values";
 
+import Authentication from "@/components/auth/authentication";
 import { HelloWave } from "@/components/HelloWave";
 import { MainAppUserDID } from "@/components/identity/userIdentity";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
@@ -29,7 +30,10 @@ const removeAuthenticatedApp = async (appId: string): Promise<void> => {
     const authenticatedApps = data ? JSON.parse(data) : [];
 
     const updatedApps = authenticatedApps.filter((id: string) => id !== appId);
-    await AsyncStorage.setItem(AUTHENTICATED_APPS_KEY, JSON.stringify(updatedApps));
+    await AsyncStorage.setItem(
+      AUTHENTICATED_APPS_KEY,
+      JSON.stringify(updatedApps)
+    );
     console.log(`App ${appId} removed from authenticated apps list`);
   } catch (error) {
     console.error("Error removing authenticated app:", error);
@@ -43,6 +47,7 @@ export default function HomeScreen() {
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const amount = 1;
   const to = "4qEcPfxS3b7Yjh59xSQdWWHX7RKyNtuUjW637RuxqFR6PrUM";
+  
 
   const fetchIdentity = async () => {
     try {
@@ -72,7 +77,7 @@ export default function HomeScreen() {
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
           <ParallaxScrollView
-            headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
+            headerBackgroundColor={{ light: "#1D3D47", dark: "#1D3D47" }}
             headerImage={
               <Image
                 source={require("@/assets/images/partial-react-logo.png")}
@@ -84,24 +89,18 @@ export default function HomeScreen() {
               <ThemedText type="title">Welcome!</ThemedText>
               <HelloWave />
             </ThemedView>
-
+            <Authentication />
             <MainAppUserDID />
 
             <View style={{ padding: 20 }}>
               <Button title="Show DID & Web3Name" onPress={fetchIdentity} />
               {did && (
-                <ThemedText style={{ marginTop: 10 }}>
-                  DID: {did}
-                </ThemedText>
+                <ThemedText style={{ marginTop: 10 }}>DID: {did}</ThemedText>
               )}
-              {web3Name && (
-                <ThemedText>
-                  Web3Name: {web3Name}
-                </ThemedText>
-              )}
+              {web3Name && <ThemedText>Web3Name: {web3Name}</ThemedText>}
               {walletAddress && (
-          <ThemedText>Wallet Address: {walletAddress}</ThemedText>
-        )}
+                <ThemedText>Wallet Address: {walletAddress}</ThemedText>
+              )}
             </View>
 
             <View style={styles.removeAppContainer}>

@@ -1,8 +1,8 @@
 import * as Kilt from "@kiltprotocol/sdk-js";
 import type {
-    DidDocument,
-    KiltAddress,
-    SignerInterface
+  DidDocument,
+  KiltAddress,
+  SignerInterface
 } from "@kiltprotocol/types";
 
 export async function claimWeb3Name(
