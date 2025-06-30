@@ -27,6 +27,26 @@ export default function Authentication() {
     }
   );
 
+  function handleLogout() {
+    SecureStore.deleteItemAsync("access_token");
+    SecureStore.deleteItemAsync("id_token");
+    SecureStore.deleteItemAsync("refresh_token");
+    setAccessToken(null);
+  }
+
+  useEffect(() => {
+    const fetchAccessToken = async () => {
+      try {
+        const token = await SecureStore.getItemAsync("access_token");
+        setAccessToken(token);
+      } catch (error) {
+        console.error("Error retrieving access token:", error);
+      }
+    };
+
+    fetchAccessToken();
+  }, []);
+
   // Exchange authorization code for tokens and fetch user info
   useEffect(() => {
     const exchangeCodeAsync = async () => {
@@ -78,18 +98,34 @@ export default function Authentication() {
   }, [result]);
 
   // UI: Login or redirect based on access token
-  if (!accessToken) {
-    return (
-      <LinearGradient colors={["#a8edea", "#fed6e3"]} style={styles.gradient}>
-        <SafeAreaView style={styles.container}>
-          <Text style={styles.title}>Please log in</Text>
-          <Button
-            disabled={!request}
-            title="Login with Auth0"
-            onPress={() => promptAsync({ useProxy: true })}
-          />
-        </SafeAreaView>
-      </LinearGradient>
-    );
-  }
+  // if (!accessToken) {
+  return (
+    <>
+      {!accessToken && (
+        <LinearGradient colors={["#a8edea", "#fed6e3"]} style={styles.gradient}>
+          <SafeAreaView style={styles.container}>
+            <Text style={styles.title}>Please log in</Text>
+            <Button
+              disabled={!request}
+              title="Login with Auth0"
+              onPress={() => promptAsync({ useProxy: true })}
+            />
+          </SafeAreaView>
+        </LinearGradient>
+      )}
+      {accessToken && (
+        <LinearGradient colors={["#a8edea", "#fed6e3"]} style={styles.gradient}>
+          <SafeAreaView style={styles.container}>
+            <Text style={styles.title}>Click to logout</Text>
+            <Button
+              disabled={!request}
+              title="Log out"
+              onPress={() => handleLogout()}
+            />
+          </SafeAreaView>
+        </LinearGradient>
+      )}
+    </>
+  );
+  // }
 }
