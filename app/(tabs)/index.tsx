@@ -10,14 +10,15 @@ import { ThemedView } from "@/components/ThemedView";
 import { BalanceUtils } from "@kiltprotocol/chain-helpers";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Image } from "expo-image";
-import React, { useState } from "react";
+import React from "react";
 import {
+  Button,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   StyleSheet,
-  TouchableWithoutFeedback
+  TouchableWithoutFeedback,
 } from "react-native";
 
 const AUTHENTICATED_APPS_KEY = "authenticatedApps";
@@ -49,25 +50,25 @@ export const removeAuthenticatedAllApp = async (): Promise<void> => {
 };
 
 export default function HomeScreen() {
-  const [did, setDid] = useState<string | null>(null);
-  const [web3Name, setWeb3Name] = useState<string | null>(null);
+  // const [did, setDid] = useState<string | null>(null);
+  // const [web3Name, setWeb3Name] = useState<string | null>(null);
   // const [appIdToRemove, setAppIdToRemove] = useState("");
-  const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  // const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const amount = BalanceUtils.toFemtoKilt(1);
   const to = "4qEcPfxS3b7Yjh59xSQdWWHX7RKyNtuUjW637RuxqFR6PrUM";
 
-  const fetchIdentity = async () => {
-    try {
-      const storedDid = await AsyncStorage.getItem("userDID");
-      const storedWeb3Name = await AsyncStorage.getItem("userWeb3Name");
-      const walletAddress = await AsyncStorage.getItem("walletAddress");
-      setDid(storedDid);
-      setWeb3Name(storedWeb3Name);
-      setWalletAddress(walletAddress);
-    } catch (err) {
-      console.error("Error fetching identity:", err);
-    }
-  };
+  // const fetchIdentity = async () => {
+  //   try {
+  //     const storedDid = await AsyncStorage.getItem("userDID");
+  //     const storedWeb3Name = await AsyncStorage.getItem("userWeb3Name");
+  //     const walletAddress = await AsyncStorage.getItem("walletAddress");
+  //     setDid(storedDid);
+  //     setWeb3Name(storedWeb3Name);
+  //     setWalletAddress(walletAddress);
+  //   } catch (err) {
+  //     console.error("Error fetching identity:", err);
+  //   }
+  // };
 
   // const handleRemoveApp = () => {
   //   if (appIdToRemove.trim()) {
@@ -101,6 +102,7 @@ export default function HomeScreen() {
             </ThemedView>
             <Authentication />
             <MainAppUserDID />
+            <Button title="Transfer amount" onPress={handleAmount} />
 
             {/* this is functionality of remove app from authenticated app with appid */}
             {/* <View style={styles.removeAppContainer}>
