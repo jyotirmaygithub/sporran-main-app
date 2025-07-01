@@ -190,7 +190,6 @@ const MiniAppIcons: React.FC = () => {
 
         try {
           // 👉 Add your payment processing logic here
-          console.log(`Processing payment of ${amount} to ${to}...`);
           paymentProcessing(amount, to, tip);
           // Simulate successful payment
           webviewRef.current?.postMessage(

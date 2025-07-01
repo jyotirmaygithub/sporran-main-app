@@ -23,7 +23,7 @@ export async function generateAccounts(
   const did_1 = require("@kiltprotocol/did");
 
   // const holderMnemonic = mnemonicGenerate();
-  const holderMnemonic = "dice mixed stereo bunker ancient elbow ride online expect doctor deposit message";
+  const holderMnemonic = "robot resource sugar labor link affair among divide group crawl connect crop";
   console.log("Holder Mnemonic:", holderMnemonic);
 
   const authKeypair = kiltUtils.Crypto.makeKeypairFromUri(

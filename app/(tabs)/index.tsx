@@ -4,8 +4,10 @@ import Authentication from "@/components/auth/authentication";
 import { HelloWave } from "@/components/HelloWave";
 import { MainAppUserDID } from "@/components/identity/userIdentity";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
+import { paymentProcessing } from "@/components/payment/paymentProcessing";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
+import { BalanceUtils } from "@kiltprotocol/chain-helpers";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Image } from "expo-image";
 import React, { useState } from "react";
@@ -16,7 +18,6 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
-  TextInput,
   TouchableWithoutFeedback,
   View,
 } from "react-native";
@@ -24,21 +25,21 @@ import {
 const AUTHENTICATED_APPS_KEY = "authenticatedApps";
 
 // Remove appId from authenticated list
-const removeAuthenticatedApp = async (appId: string): Promise<void> => {
-  try {
-    const data = await AsyncStorage.getItem(AUTHENTICATED_APPS_KEY);
-    const authenticatedApps = data ? JSON.parse(data) : [];
+// const removeAuthenticatedApp = async (appId: string): Promise<void> => {
+//   try {
+//     const data = await AsyncStorage.getItem(AUTHENTICATED_APPS_KEY);
+//     const authenticatedApps = data ? JSON.parse(data) : [];
 
-    const updatedApps = authenticatedApps.filter((id: string) => id !== appId);
-    await AsyncStorage.setItem(
-      AUTHENTICATED_APPS_KEY,
-      JSON.stringify(updatedApps)
-    );
-    console.log(`App ${appId} removed from authenticated apps list`);
-  } catch (error) {
-    console.error("Error removing authenticated app:", error);
-  }
-};
+//     const updatedApps = authenticatedApps.filter((id: string) => id !== appId);
+//     await AsyncStorage.setItem(
+//       AUTHENTICATED_APPS_KEY,
+//       JSON.stringify(updatedApps)
+//     );
+//     console.log(`App ${appId} removed from authenticated apps list`);
+//   } catch (error) {
+//     console.error("Error removing authenticated app:", error);
+//   }
+// };
 
 export const removeAuthenticatedAllApp = async (): Promise<void> => {
   try {
@@ -49,15 +50,13 @@ export const removeAuthenticatedAllApp = async (): Promise<void> => {
   }
 };
 
-
 export default function HomeScreen() {
   const [did, setDid] = useState<string | null>(null);
   const [web3Name, setWeb3Name] = useState<string | null>(null);
-  const [appIdToRemove, setAppIdToRemove] = useState("");
+  // const [appIdToRemove, setAppIdToRemove] = useState("");
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
-  const amount = 1;
+  const amount = BalanceUtils.toFemtoKilt(1);
   const to = "4qEcPfxS3b7Yjh59xSQdWWHX7RKyNtuUjW637RuxqFR6PrUM";
-  
 
   const fetchIdentity = async () => {
     try {
@@ -72,11 +71,14 @@ export default function HomeScreen() {
     }
   };
 
-  const handleRemoveApp = () => {
-    if (appIdToRemove.trim()) {
-      removeAuthenticatedApp(appIdToRemove.trim());
-      setAppIdToRemove("");
-    }
+  // const handleRemoveApp = () => {
+  //   if (appIdToRemove.trim()) {
+  //     removeAuthenticatedApp(appIdToRemove.trim());
+  //     setAppIdToRemove("");
+  //   }
+  // };
+  const handleAmount = () => {
+    paymentProcessing(amount, to, 0n);
   };
 
   return (
@@ -113,7 +115,9 @@ export default function HomeScreen() {
               )}
             </View>
 
-              {/* this is functionality of remove app from authenticated app with appid */}
+            <Button title="Transfer amount" onPress={handleAmount} />
+
+            {/* this is functionality of remove app from authenticated app with appid */}
             {/* <View style={styles.removeAppContainer}>
               <TextInput
                 style={styles.input}
