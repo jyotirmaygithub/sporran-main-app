@@ -1,3 +1,4 @@
+import { removeAuthenticatedAllApp } from "@/app/(tabs)";
 import * as AuthSession from "expo-auth-session";
 import { LinearGradient } from "expo-linear-gradient";
 import * as SecureStore from "expo-secure-store";
@@ -31,6 +32,7 @@ export default function Authentication() {
     SecureStore.deleteItemAsync("access_token");
     SecureStore.deleteItemAsync("id_token");
     SecureStore.deleteItemAsync("refresh_token");
+    removeAuthenticatedAllApp();
     setAccessToken(null);
   }
 
