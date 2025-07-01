@@ -40,6 +40,16 @@ const removeAuthenticatedApp = async (appId: string): Promise<void> => {
   }
 };
 
+export const removeAuthenticatedAllApp = async (): Promise<void> => {
+  try {
+    await AsyncStorage.removeItem(AUTHENTICATED_APPS_KEY);
+    console.log("All authenticated apps removed from storage");
+  } catch (error) {
+    console.error("Error removing all authenticated apps:", error);
+  }
+};
+
+
 export default function HomeScreen() {
   const [did, setDid] = useState<string | null>(null);
   const [web3Name, setWeb3Name] = useState<string | null>(null);
