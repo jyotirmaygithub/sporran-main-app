@@ -1,7 +1,9 @@
 import { Popup } from "@/components/modals/popUp";
 import { paymentProcessing } from "@/components/payment/paymentProcessing";
+import { getUserInfoFromIdToken } from "@/components/user/userData";
 import { localSdkVersion } from "@/components/version/version";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from 'expo-secure-store';
 import React, { useRef, useState } from "react";
 import {
   Alert,
@@ -105,10 +107,18 @@ const MiniAppIcons: React.FC = () => {
         await addAuthenticatedApp(initData.payload.appid);
       }
 
+      const accessToken = await SecureStore.getItemAsync("id_token");
+      let userdata;
+      if (accessToken) {
+         userdata = getUserInfoFromIdToken(accessToken);
+      }
+
       const response_payload = {
         status: "success",
         did: did || null,
         web3Name: web3Name || null,
+        email: userdata?.email || null,
+        name: userdata?.name || null,
       };
 
       console.log(
