@@ -12,14 +12,12 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Image } from "expo-image";
 import React, { useState } from "react";
 import {
-  Button,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   StyleSheet,
-  TouchableWithoutFeedback,
-  View,
+  TouchableWithoutFeedback
 } from "react-native";
 
 const AUTHENTICATED_APPS_KEY = "authenticatedApps";
@@ -103,19 +101,6 @@ export default function HomeScreen() {
             </ThemedView>
             <Authentication />
             <MainAppUserDID />
-
-            <View style={{ padding: 20 }}>
-              <Button title="Show DID & Web3Name" onPress={fetchIdentity} />
-              {did && (
-                <ThemedText style={{ marginTop: 10 }}>DID: {did}</ThemedText>
-              )}
-              {web3Name && <ThemedText>Web3Name: {web3Name}</ThemedText>}
-              {walletAddress && (
-                <ThemedText>Wallet Address: {walletAddress}</ThemedText>
-              )}
-            </View>
-
-            <Button title="Transfer amount" onPress={handleAmount} />
 
             {/* this is functionality of remove app from authenticated app with appid */}
             {/* <View style={styles.removeAppContainer}>
