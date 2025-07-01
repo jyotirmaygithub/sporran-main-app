@@ -1,7 +1,7 @@
 import * as Kilt from "@kiltprotocol/sdk-js";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useEffect, useState } from "react";
-import { Button, Text, View } from "react-native";
+import { ActivityIndicator, Button, Text, View } from "react-native";
 import { generateAccounts } from "../accountCreation/generateAccount";
 import { generateDid } from "../did/generateDid";
 import { claimWeb3Name } from "../web3name/claimweb3name";
@@ -10,8 +10,10 @@ export function MainAppUserDID() {
   const [didUri, setDidUri] = useState<string | null>(null);
   const [web3Name, setWeb3Name] = useState<string | null>(null);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const setupUserIdentity = async () => {
+    setIsLoading(true);
     try {
       await Kilt.connect("wss://peregrine.kilt.io/");
       console.log("✅ Connected to KILT network");
@@ -86,8 +88,11 @@ export function MainAppUserDID() {
 
       setDidUri(holderDidResponse.didDocument.id);
       setWeb3Name(username);
+      setWalletAddress(holderWallet.address);
     } catch (error) {
       console.error("❌ Error setting up user identity:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -107,16 +112,25 @@ export function MainAppUserDID() {
 
   return (
     <View style={{ padding: 20 }}>
-      <Text style={{ color: "white", marginBottom: 10 }}>
-        DID: {didUri || "Not generated"}
-      </Text>
-      <Text style={{ color: "white", marginBottom: 10 }}>
-        Web3Name: {web3Name || "Not registered"}
-      </Text>
-      <Text style={{ color: "white", marginBottom: 10 }}>
-        walletAddress: {walletAddress || "Not registered"}
-      </Text>
-      <Button title="Setup Identity" onPress={setupUserIdentity} />
+      { !isLoading && (
+        <>
+          <Text style={{ color: "black", marginBottom: 10 }}>
+            DID: {didUri || "Not generated"}
+          </Text>
+          <Text style={{ color: "black", marginBottom: 10 }}>
+            Web3Name: {web3Name || "Not registered"}
+          </Text>
+          <Text style={{ color: "black", marginBottom: 10 }}>
+            walletAddress: {walletAddress || "Not registered"}
+          </Text>
+        </>
+      )}
+      
+      {isLoading ? (
+        <ActivityIndicator size="large" color="#007AFF" style={{ marginRight: 10 }} />
+      ) : (
+        <Button title="Setup Identity" onPress={setupUserIdentity} />
+      )}
     </View>
   );
 }
