@@ -103,7 +103,8 @@ export default function HomeScreen() {
               )}
             </View>
 
-            <View style={styles.removeAppContainer}>
+              {/* this is functionality of remove app from authenticated app with appid */}
+            {/* <View style={styles.removeAppContainer}>
               <TextInput
                 style={styles.input}
                 value={appIdToRemove}
@@ -112,7 +113,7 @@ export default function HomeScreen() {
                 placeholderTextColor="#888"
               />
               <Button title="Remove App ID" onPress={handleRemoveApp} />
-            </View>
+            </View> */}
           </ParallaxScrollView>
         </ScrollView>
       </TouchableWithoutFeedback>
