@@ -4,21 +4,18 @@ import Authentication from "@/components/auth/authentication";
 import { HelloWave } from "@/components/HelloWave";
 import { MainAppUserDID } from "@/components/identity/userIdentity";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
-import { paymentProcessing } from "@/components/payment/paymentProcessing";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import { BalanceUtils } from "@kiltprotocol/chain-helpers";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Image } from "expo-image";
 import React from "react";
 import {
-  Button,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   StyleSheet,
-  TouchableWithoutFeedback,
+  TouchableWithoutFeedback
 } from "react-native";
 
 const AUTHENTICATED_APPS_KEY = "authenticatedApps";
@@ -54,8 +51,8 @@ export default function HomeScreen() {
   // const [web3Name, setWeb3Name] = useState<string | null>(null);
   // const [appIdToRemove, setAppIdToRemove] = useState("");
   // const [walletAddress, setWalletAddress] = useState<string | null>(null);
-  const amount = BalanceUtils.toFemtoKilt(1);
-  const to = "4qEcPfxS3b7Yjh59xSQdWWHX7RKyNtuUjW637RuxqFR6PrUM";
+  // const amount = BalanceUtils.toFemtoKilt(1);
+  // const to = "4qEcPfxS3b7Yjh59xSQdWWHX7RKyNtuUjW637RuxqFR6PrUM";
 
   // const fetchIdentity = async () => {
   //   try {
@@ -76,9 +73,9 @@ export default function HomeScreen() {
   //     setAppIdToRemove("");
   //   }
   // };
-  const handleAmount = () => {
-    paymentProcessing(amount, to, 0n);
-  };
+  // const handleAmount = () => {
+  //   paymentProcessing(amount, to, 0n);
+  // };
 
   return (
     <KeyboardAvoidingView
@@ -102,7 +99,7 @@ export default function HomeScreen() {
             </ThemedView>
             <Authentication />
             <MainAppUserDID />
-            <Button title="Transfer amount" onPress={handleAmount} />
+            {/* <Button title="Transfer amount" onPress={handleAmount} /> */}
 
             {/* this is functionality of remove app from authenticated app with appid */}
             {/* <View style={styles.removeAppContainer}>
