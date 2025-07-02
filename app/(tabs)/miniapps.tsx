@@ -1,11 +1,8 @@
 import { Popup } from "@/components/modals/popUp";
 import TransactionReviewModal from "@/components/modals/reviewTransaction";
-import { paymentProcessing } from "@/components/payment/paymentProcessing";
 import { getUserInfoFromIdToken } from "@/components/user/userData";
 import { localSdkVersion } from "@/components/version/version";
-import { BalanceUtils } from "@kiltprotocol/chain-helpers";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import BN from "bn.js";
 import * as SecureStore from "expo-secure-store";
 import React, { useRef, useState } from "react";
 import {
@@ -58,7 +55,7 @@ const MiniAppIcons: React.FC = () => {
   const [reviewPopUp, setReviewPopUp] = useState(false);
   // const [sendAmount, setSendAmount] = useState<>(BigInt(0));
 
-const [sendAmount, setSendAmount] = useState<BN>(new BN(0));
+const [sendAmount, setSendAmount] = useState(BigInt(0));
 
   const [to, setTo] = useState<string>("");
   const [tip, setTip] = useState<bigint>(BigInt(0));
@@ -197,7 +194,7 @@ const [sendAmount, setSendAmount] = useState<BN>(new BN(0));
         }
 
         try {
-          setSendAmount(BalanceUtils.toFemtoKilt(amount));
+          setSendAmount(amount);
           setTo(to);
           setTip(tip);
           setReviewPopUp(true)
@@ -349,15 +346,9 @@ const [sendAmount, setSendAmount] = useState<BN>(new BN(0));
         amount={sendAmount}
         to={to}
         tip={tip}
-        onCancel={function (): void {
-          // setTransactionReview(false);
+        webviewRef={webviewRef}
+        onClose={() => {
           setReviewPopUp(false);
-          
-        }}
-        onApprove={function (): void {
-          // setTransactionReview(true);
-          setReviewPopUp(true);
-          paymentProcessing(sendAmount, to, tip, webviewRef);
         }}
       />
 
