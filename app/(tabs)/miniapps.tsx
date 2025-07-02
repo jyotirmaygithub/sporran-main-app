@@ -1,9 +1,10 @@
 import { Popup } from "@/components/modals/popUp";
+import TransactionReviewModal from "@/components/modals/reviewTransaction";
 import { paymentProcessing } from "@/components/payment/paymentProcessing";
 import { getUserInfoFromIdToken } from "@/components/user/userData";
 import { localSdkVersion } from "@/components/version/version";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as SecureStore from 'expo-secure-store';
+import * as SecureStore from "expo-secure-store";
 import React, { useRef, useState } from "react";
 import {
   Alert,
@@ -52,6 +53,11 @@ const MiniAppIcons: React.FC = () => {
   const webviewRef = useRef<WebView>(null);
   const [selectedUrl, setSelectedUrl] = useState<string | null>(null);
   const [showPopup, setShowPopup] = useState(false);
+  const [reviewPopUp, setReviewPopUp] = useState(false);
+  const [sendAmount, setSendAmount] = useState<bigint>(BigInt(0));
+  const [to, setTo] = useState<string>("");
+  const [tip, setTip] = useState<bigint>(BigInt(0));
+  const [transactionReview, setTransactionReview] = useState(false);
   const [pendingInitData, setPendingInitData] = useState<any>(null);
 
   // Helper function to get authenticated apps from local storage
@@ -110,7 +116,7 @@ const MiniAppIcons: React.FC = () => {
       const accessToken = await SecureStore.getItemAsync("id_token");
       let userdata;
       if (accessToken) {
-         userdata = getUserInfoFromIdToken(accessToken);
+        userdata = getUserInfoFromIdToken(accessToken);
       }
 
       const response_payload = {
@@ -166,17 +172,14 @@ const MiniAppIcons: React.FC = () => {
       case "pay":
         console.log("Initiating payment...");
         // Example: Extract payment details from data.payload
-        const { amount, to, tip, fee, network, token_symbol, description } =
+        const { amount, to, tip, network, token_symbol } =
           data.payload || {};
 
         if (
           !amount ||
           !to ||
-          !tip ||
-          !fee ||
           !network ||
-          !token_symbol ||
-          !description
+          !token_symbol
         ) {
           console.warn("Payment request missing amount or recipient.");
           webviewRef.current?.postMessage(
@@ -189,15 +192,20 @@ const MiniAppIcons: React.FC = () => {
         }
 
         try {
-          // 👉 Add your payment processing logic here
-          paymentProcessing(amount, to, tip);
-          // Simulate successful payment
-          webviewRef.current?.postMessage(
-            JSON.stringify({
-              status: "success",
-              message: `Payment of ${amount} to ${to} processed successfully.`,
-            })
-          );
+          setSendAmount(amount);
+          setTo(to);
+          setTip(tip);
+          setReviewPopUp(true)
+          // if (transactionReview) {
+          //   paymentProcessing(amount, to, tip);
+            // Simulate successful payment
+            // webviewRef.current?.postMessage(
+            //   JSON.stringify({
+            //     status: "success",
+            //     message: `Payment of ${amount} to ${to} processed successfully.`,
+            //   })
+            // );
+          // }
         } catch (error) {
           console.error("Payment failed:", error);
           webviewRef.current?.postMessage(
@@ -329,6 +337,22 @@ const MiniAppIcons: React.FC = () => {
             await sendInitResponse(result, pendingInitData);
             setPendingInitData(null);
           }
+        }}
+      />
+      <TransactionReviewModal
+        visible={reviewPopUp}
+        amount={sendAmount}
+        to={to}
+        tip={tip}
+        onCancel={function (): void {
+          // setTransactionReview(false);
+          setReviewPopUp(false);
+          
+        }}
+        onApprove={function (): void {
+          // setTransactionReview(true);
+          setReviewPopUp(true);
+          paymentProcessing(sendAmount, to, tip, webviewRef);
         }}
       />
 

@@ -4,11 +4,14 @@ import { ConfigService } from "@kiltprotocol/sdk-js";
 import type { SubmittableExtrinsic } from "@polkadot/api/types";
 import { Keyring } from "@polkadot/keyring";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { RefObject } from "react";
+import { WebView } from "react-native-webview";
 
 export async function paymentProcessing(
   amount: bigint,
   to: string,
-  tip: bigint
+  tip: bigint,
+  webviewRef: RefObject<WebView<{}> | null>
 ): Promise<{ status: "success" | "error"; message: string; txHash?: string }> {
   try {
     console.log(
@@ -55,6 +58,24 @@ export async function paymentProcessing(
     console.log(`✅ Transaction submitted with hash: ${hash}`);
     delete currentTx[hash];
 
+    const response_payload = {
+      status: "success",
+      transaction_status: "submitted",
+      transaction_id: hash,
+      reference: hash,
+      from: senderAddress,
+      chain: "klit",
+      timestamp: new Date().toISOString(),
+      version: 1,
+    };
+    const jsCode = `
+                        window.MiniKit.trigger('miniapp-payment', ${JSON.stringify(
+                          response_payload
+                        )});
+                        true;
+                    `;
+    webviewRef.current?.injectJavaScript(jsCode);
+
     return {
       status: "success",
       message: "Transaction submitted successfully",
@@ -70,6 +91,15 @@ export async function paymentProcessing(
     } else if (error?.toString) {
       errorMessage = error.toString();
     }
+    const response_payload = {
+      status: "error",
+      message: `You must authenticate the app before using it.`,
+    };
+    const jsCode = `
+        window.MiniKit.trigger('init', ${JSON.stringify(response_payload)});
+        true;
+      `;
+    webviewRef.current?.injectJavaScript(jsCode);
 
     console.error("❌ Transaction error:", error);
     return { status: "error", message: errorMessage };
