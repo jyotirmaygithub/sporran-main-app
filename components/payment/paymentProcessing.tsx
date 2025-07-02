@@ -4,11 +4,12 @@ import { ConfigService } from "@kiltprotocol/sdk-js";
 import type { SubmittableExtrinsic } from "@polkadot/api/types";
 import { Keyring } from "@polkadot/keyring";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import BN from "bn.js";
 import { RefObject } from "react";
 import { WebView } from "react-native-webview";
 
 export async function paymentProcessing(
-  amount: bigint,
+  amount: BN,
   to: string,
   tip: bigint,
   webviewRef: RefObject<WebView<{}> | null>
@@ -40,13 +41,6 @@ export async function paymentProcessing(
       data: { free: freeBalance },
     } = await api.query.system.account(senderAddress);
     console.log(`💸 Sender free balance: ${freeBalance.toHuman()}`);
-
-    const totalRequired = amount + tip;
-    if (freeBalance.toBigInt() < totalRequired) {
-      const msg = `❌ Insufficient balance. Required: ${totalRequired}, Available: ${freeBalance.toBigInt()}`;
-      console.error(msg);
-      return { status: "error", message: msg };
-    }
 
     const tx = api.tx.balances.transferAllowDeath(to, amount);
     const signedTx = await tx.signAsync(keypair, { tip });
@@ -96,7 +90,7 @@ export async function paymentProcessing(
       message: `You must authenticate the app before using it.`,
     };
     const jsCode = `
-        window.MiniKit.trigger('init', ${JSON.stringify(response_payload)});
+        window.MiniKit.trigger('miniapp-payment', ${JSON.stringify(response_payload)});
         true;
       `;
     webviewRef.current?.injectJavaScript(jsCode);

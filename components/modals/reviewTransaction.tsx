@@ -1,11 +1,11 @@
+import BN from "bn.js";
 import React, { useState } from "react";
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { WebView } from "react-native-webview";
 import { paymentProcessing } from "../payment/paymentProcessing";
-
 type Props = {
   visible: boolean;
-  amount: bigint;
+  amount: BN;
   to: string;
   tip: bigint;
   webviewRef: React.RefObject<WebView | null>;
@@ -18,7 +18,7 @@ const TransactionReviewModal: React.FC<Props> = ({
   to,
   tip,
   webviewRef,
-  onClose
+  onClose,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isDone, setIsDone] = useState(false);
@@ -31,7 +31,9 @@ const TransactionReviewModal: React.FC<Props> = ({
       message: `Main App declined the transaction.`,
     };
     const jsCode = `
-        window.MiniKit.trigger('miniapp-payment', ${JSON.stringify(response_payload)});
+        window.MiniKit.trigger('miniapp-payment', ${JSON.stringify(
+          response_payload
+        )});
         true;
       `;
     webviewRef.current?.injectJavaScript(jsCode);
@@ -64,11 +66,7 @@ const TransactionReviewModal: React.FC<Props> = ({
   };
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="fade"
-    >
+    <Modal visible={visible} transparent animationType="fade">
       <View style={styles.overlay}>
         <View style={styles.modal}>
           <Text style={styles.title}>Review Transaction</Text>
@@ -91,10 +89,13 @@ const TransactionReviewModal: React.FC<Props> = ({
           <View style={styles.buttonRow}>
             {isLoading ? (
               isDone ? (
-                <TouchableOpacity style={[
-                  styles.approveButton, 
-                  isFailed && styles.failedButton
-                ]} onPress={onDoneClick}>
+                <TouchableOpacity
+                  style={[
+                    styles.approveButton,
+                    isFailed && styles.failedButton,
+                  ]}
+                  onPress={onDoneClick}
+                >
                   <Text style={styles.approveText}>
                     {isFailed ? "Failed - Close" : "Done"}
                   </Text>
@@ -104,10 +105,16 @@ const TransactionReviewModal: React.FC<Props> = ({
               )
             ) : (
               <>
-                <TouchableOpacity style={styles.cancelButton} onPress={onCancel}>
+                <TouchableOpacity
+                  style={styles.cancelButton}
+                  onPress={onCancel}
+                >
                   <Text style={styles.cancelText}>Cancel</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.approveButton} onPress={onApprove}>
+                <TouchableOpacity
+                  style={styles.approveButton}
+                  onPress={onApprove}
+                >
                   <Text style={styles.approveText}>Approve</Text>
                 </TouchableOpacity>
               </>
