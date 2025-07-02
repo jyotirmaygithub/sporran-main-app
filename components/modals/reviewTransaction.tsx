@@ -1,9 +1,10 @@
+import BN from "bn.js";
 import React from "react";
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 type Props = {
   visible: boolean;
-  amount: bigint;
+  amount: BN;
   to: string;
   tip: bigint;
   onCancel: () => void;
@@ -30,7 +31,7 @@ const TransactionReviewModal: React.FC<Props> = ({
 
           <View style={styles.row}>
             <Text style={styles.label}>Amount:</Text>
-            <Text style={styles.value}>{amount} KILT</Text>
+            <Text style={styles.value}>{amount.toString()} KILT</Text>
           </View>
 
           <View style={styles.row}>
