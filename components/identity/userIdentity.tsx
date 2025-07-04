@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Button, Text, View } from "react-native";
 import { generateAccounts } from "../accountCreation/generateAccount";
 import { generateDid } from "../did/generateDid";
+import { formatKiltValue } from "../modals/reviewTransaction";
 import { claimWeb3Name } from "../web3name/claimweb3name";
 
 export function MainAppUserDID() {
@@ -11,12 +12,16 @@ export function MainAppUserDID() {
   const [web3Name, setWeb3Name] = useState<string | null>(null);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [userBalance, setUserBalance] = useState("0");
 
   const setupUserIdentity = async () => {
     setIsLoading(true);
     try {
       await Kilt.connect("wss://peregrine.kilt.io/");
       console.log("✅ Connected to KILT network");
+      const api = Kilt.ConfigService.get("api");
+      if (!api) throw new Error("API not initialized.");
+      console.log("🔌 API ready");
 
       const faucet = {
         publicKey: new Uint8Array([
@@ -44,6 +49,12 @@ export function MainAppUserDID() {
         setDidUri(result.resolvedDid ?? null);
         setWeb3Name(result.web3Name ?? null);
         setWalletAddress(result.walletAddress ?? null);
+
+        const {
+          data: { free: freeBalance },
+        } = await api.query.system.account(result.walletAddress);
+        setUserBalance(formatKiltValue(freeBalance.toHuman()));
+        await AsyncStorage.setItem("usertoken", freeBalance.toHuman());
         await AsyncStorage.setItem("walletAddress", result.walletAddress ?? "");
         await AsyncStorage.setItem("userDID", result.resolvedDid ?? "");
         await AsyncStorage.setItem("userWeb3Name", result.web3Name ?? "");
@@ -84,6 +95,11 @@ export function MainAppUserDID() {
         "signers",
         holderDidResponse.signers.toString()
       );
+      const {
+        data: { free: freeBalance },
+      } = await api.query.system.account(holderWallet.address);
+      setUserBalance(formatKiltValue(freeBalance.toHuman()));
+      await AsyncStorage.setItem("usertoken", freeBalance.toHuman());
       await AsyncStorage.setItem("userDID", holderDidResponse.didDocument.id);
       await AsyncStorage.setItem("walletAddress", holderWallet.address);
       await AsyncStorage.setItem("userWeb3Name", username);
@@ -103,10 +119,12 @@ export function MainAppUserDID() {
       const storedDID = await AsyncStorage.getItem("userDID");
       const storedWeb3Name = await AsyncStorage.getItem("userWeb3Name");
       const walletAddress = await AsyncStorage.getItem("walletAddress");
+      const userTokens = await AsyncStorage.getItem("usertoken");
 
       if (storedDID) setDidUri(storedDID);
       if (storedWeb3Name) setWeb3Name(storedWeb3Name);
       if (walletAddress) setWalletAddress(walletAddress);
+      if (userTokens) setUserBalance(formatKiltValue(userTokens));
     };
 
     loadStoredIdentity();
@@ -132,6 +150,12 @@ export function MainAppUserDID() {
             walletAddress:{" "}
             <Text style={{ fontWeight: "bold" }}>
               {walletAddress || "Not registered"}
+            </Text>
+          </Text>
+          <Text style={{ color: "black", marginBottom: 10 }}>
+            user klit tokens:{" "}
+            <Text style={{ fontWeight: "bold" }}>
+              {(userBalance && userBalance) || "Not registered"}
             </Text>
           </Text>
         </>
