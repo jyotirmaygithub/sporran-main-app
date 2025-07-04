@@ -39,12 +39,14 @@ export function MainAppUserDID() {
       console.log("✅ Faucet submitter address:", submitter);
 
       const result = await generateAccounts();
-      if (result.resolvedDid && result.web3Name) {
+      if (result.resolvedDid && result.web3Name, result.walletAddress) {
         console.log("✅ Existing identity found");
-        setDidUri(result.resolvedDid);
-        setWeb3Name(result.web3Name);
-        await AsyncStorage.setItem("userDID", result.resolvedDid);
-        await AsyncStorage.setItem("userWeb3Name", result.web3Name);
+        setDidUri(result.resolvedDid ?? null);
+        setWeb3Name(result.web3Name ?? null);
+        setWalletAddress(result.walletAddress ?? null);
+        await AsyncStorage.setItem("walletAddress", result.walletAddress ?? "");
+        await AsyncStorage.setItem("userDID", result.resolvedDid ?? "");
+        await AsyncStorage.setItem("userWeb3Name", result.web3Name ?? "");
         return;
       }
 

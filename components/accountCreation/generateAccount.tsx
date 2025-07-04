@@ -10,6 +10,7 @@ interface GeneratedAccounts {
   holderWallet?: KeyringPair;
   resolvedDid?: string;
   web3Name?: string;
+  walletAddress?: string;
 }
 
 export async function generateAccounts(
@@ -18,12 +19,14 @@ export async function generateAccounts(
   const keyring = new Keyring({ type: "sr25519", ss58Format: 38 });
   let resolvedDid: string | null = null;
   let web3Name: string | null = null;
+  let walletAddress: string | null = null;
   const api = Kilt.ConfigService.get("api");
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const did_1 = require("@kiltprotocol/did");
 
   // const holderMnemonic = mnemonicGenerate();
-  const holderMnemonic = "robot resource sugar labor link affair among divide group crawl connect crop";
+  const holderMnemonic =
+    "robot resource sugar labor link affair among divide group crawl connect crop";
   console.log("Holder Mnemonic:", holderMnemonic);
 
   const authKeypair = kiltUtils.Crypto.makeKeypairFromUri(
@@ -56,12 +59,20 @@ export async function generateAccounts(
     console.log("W3N check failed:", err);
   }
 
+  const keypair = keyring.addFromMnemonic(holderMnemonic);
+  walletAddress = keypair.address;
+  if(!walletAddress){
+    throw console.error("wallet address not generated successfully");
+    
+  }
+
   // === If both DID + Web3Name exist → no need to regenerate ===
-  if (resolvedDid && web3Name) {
+  if (resolvedDid && web3Name && walletAddress) {
     console.log("🚀 Identity exists. Returning DID + Web3Name only");
     return {
       resolvedDid,
       web3Name,
+      walletAddress
     };
   }
 
