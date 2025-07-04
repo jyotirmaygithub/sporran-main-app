@@ -64,6 +64,11 @@ const TransactionReviewModal: React.FC<Props> = ({
     setIsFailed(false);
     onClose();
   };
+  function formatKiltValue(token_amount: BN, decimals = 5): string {
+    const stringValue= token_amount.toString();
+    const preciseNumber = parseFloat(stringValue) / 1e15;
+    return preciseNumber.toFixed(decimals).replace(/\.?0+$/, '');
+  }
 
   return (
     <Modal visible={visible} transparent animationType="fade">
@@ -73,7 +78,7 @@ const TransactionReviewModal: React.FC<Props> = ({
 
           <View style={styles.row}>
             <Text style={styles.label}>Amount:</Text>
-            <Text style={styles.value}>{amount.toString()} KILT</Text>
+            <Text style={styles.value}>{formatKiltValue(amount)} KILT</Text>
           </View>
 
           <View style={styles.row}>
@@ -83,7 +88,9 @@ const TransactionReviewModal: React.FC<Props> = ({
 
           <View style={styles.row}>
             <Text style={styles.label}>Tip:</Text>
-            <Text style={styles.value}>{tip} KILT</Text>
+            <Text style={styles.value}>
+              {(tip && tip !== 0n ? tip: '0')} KILT
+            </Text>
           </View>
 
           <View style={styles.buttonRow}>
