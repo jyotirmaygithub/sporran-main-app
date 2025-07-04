@@ -15,27 +15,10 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
-  TouchableWithoutFeedback
+  TouchableWithoutFeedback,
 } from "react-native";
 
 const AUTHENTICATED_APPS_KEY = "authenticatedApps";
-
-// Remove appId from authenticated list
-// const removeAuthenticatedApp = async (appId: string): Promise<void> => {
-//   try {
-//     const data = await AsyncStorage.getItem(AUTHENTICATED_APPS_KEY);
-//     const authenticatedApps = data ? JSON.parse(data) : [];
-
-//     const updatedApps = authenticatedApps.filter((id: string) => id !== appId);
-//     await AsyncStorage.setItem(
-//       AUTHENTICATED_APPS_KEY,
-//       JSON.stringify(updatedApps)
-//     );
-//     console.log(`App ${appId} removed from authenticated apps list`);
-//   } catch (error) {
-//     console.error("Error removing authenticated app:", error);
-//   }
-// };
 
 export const removeAuthenticatedAllApp = async (): Promise<void> => {
   try {
@@ -47,36 +30,6 @@ export const removeAuthenticatedAllApp = async (): Promise<void> => {
 };
 
 export default function HomeScreen() {
-  // const [did, setDid] = useState<string | null>(null);
-  // const [web3Name, setWeb3Name] = useState<string | null>(null);
-  // const [appIdToRemove, setAppIdToRemove] = useState("");
-  // const [walletAddress, setWalletAddress] = useState<string | null>(null);
-  // const amount = BalanceUtils.toFemtoKilt(1);
-  // const to = "4qEcPfxS3b7Yjh59xSQdWWHX7RKyNtuUjW637RuxqFR6PrUM";
-
-  // const fetchIdentity = async () => {
-  //   try {
-  //     const storedDid = await AsyncStorage.getItem("userDID");
-  //     const storedWeb3Name = await AsyncStorage.getItem("userWeb3Name");
-  //     const walletAddress = await AsyncStorage.getItem("walletAddress");
-  //     setDid(storedDid);
-  //     setWeb3Name(storedWeb3Name);
-  //     setWalletAddress(walletAddress);
-  //   } catch (err) {
-  //     console.error("Error fetching identity:", err);
-  //   }
-  // };
-
-  // const handleRemoveApp = () => {
-  //   if (appIdToRemove.trim()) {
-  //     removeAuthenticatedApp(appIdToRemove.trim());
-  //     setAppIdToRemove("");
-  //   }
-  // };
-  // const handleAmount = () => {
-  //   paymentProcessing(amount, to, 0n);
-  // };
-
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -99,19 +52,6 @@ export default function HomeScreen() {
             </ThemedView>
             <Authentication />
             <MainAppUserDID />
-            {/* <Button title="Transfer amount" onPress={handleAmount} /> */}
-
-            {/* this is functionality of remove app from authenticated app with appid */}
-            {/* <View style={styles.removeAppContainer}>
-              <TextInput
-                style={styles.input}
-                value={appIdToRemove}
-                onChangeText={setAppIdToRemove}
-                placeholder="Enter App ID to remove"
-                placeholderTextColor="#888"
-              />
-              <Button title="Remove App ID" onPress={handleRemoveApp} />
-            </View> */}
           </ParallaxScrollView>
         </ScrollView>
       </TouchableWithoutFeedback>

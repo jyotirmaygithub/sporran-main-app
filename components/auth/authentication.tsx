@@ -99,8 +99,6 @@ export default function Authentication() {
     exchangeCodeAsync();
   }, [result]);
 
-  // UI: Login or redirect based on access token
-  // if (!accessToken) {
   return (
     <>
       {!accessToken && (
@@ -129,5 +127,4 @@ export default function Authentication() {
       )}
     </>
   );
-  // }
 }

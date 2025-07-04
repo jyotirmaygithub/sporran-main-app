@@ -202,16 +202,6 @@ const [sendAmount, setSendAmount] = useState<BN>(new BN(0));
           setTo(to);
           setTip(tip);
           setReviewPopUp(true)
-          // if (transactionReview) {
-          //   paymentProcessing(amount, to, tip);
-            // Simulate successful payment
-            // webviewRef.current?.postMessage(
-            //   JSON.stringify({
-            //     status: "success",
-            //     message: `Payment of ${amount} to ${to} processed successfully.`,
-            //   })
-            // );
-          // }
         } catch (error) {
           console.error("Payment failed:", error);
           webviewRef.current?.postMessage(
