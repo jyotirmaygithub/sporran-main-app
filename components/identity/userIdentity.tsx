@@ -39,7 +39,7 @@ export function MainAppUserDID() {
       console.log("✅ Faucet submitter address:", submitter);
 
       const result = await generateAccounts();
-      if (result.resolvedDid && result.web3Name, result.walletAddress) {
+      if ((result.resolvedDid && result.web3Name, result.walletAddress)) {
         console.log("✅ Existing identity found");
         setDidUri(result.resolvedDid ?? null);
         setWeb3Name(result.web3Name ?? null);
@@ -114,22 +114,35 @@ export function MainAppUserDID() {
 
   return (
     <View style={{ padding: 20 }}>
-      { !isLoading && (
+      {!isLoading && (
         <>
           <Text style={{ color: "black", marginBottom: 10 }}>
-            DID: {didUri || "Not generated"}
+            DID:{" "}
+            <Text style={{ fontWeight: "bold" }}>
+              {didUri || "Not generated"}
+            </Text>
           </Text>
           <Text style={{ color: "black", marginBottom: 10 }}>
-            Web3Name: {web3Name || "Not registered"}
+            Web3Name:{" "}
+            <Text style={{ fontWeight: "bold" }}>
+              {web3Name || "Not registered"}
+            </Text>
           </Text>
           <Text style={{ color: "black", marginBottom: 10 }}>
-            walletAddress: {walletAddress || "Not registered"}
+            walletAddress:{" "}
+            <Text style={{ fontWeight: "bold" }}>
+              {walletAddress || "Not registered"}
+            </Text>
           </Text>
         </>
       )}
-      
+
       {isLoading ? (
-        <ActivityIndicator size="large" color="#007AFF" style={{ marginRight: 10 }} />
+        <ActivityIndicator
+          size="large"
+          color="#007AFF"
+          style={{ marginRight: 10 }}
+        />
       ) : (
         <Button title="Setup Identity" onPress={setupUserIdentity} />
       )}
