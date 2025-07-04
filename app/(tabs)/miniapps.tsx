@@ -109,6 +109,7 @@ const [sendAmount, setSendAmount] = useState<BN>(new BN(0));
     if (authResult) {
       const did = await AsyncStorage.getItem("userDID");
       const web3Name = await AsyncStorage.getItem("userWeb3Name");
+      const walletAddress = await AsyncStorage.getItem("walletAddress");
       console.log("DID:", did);
       console.log("Web3Name:", web3Name);
 
@@ -127,6 +128,7 @@ const [sendAmount, setSendAmount] = useState<BN>(new BN(0));
         status: "success",
         did: did || null,
         web3Name: web3Name || null,
+        walletAddress: walletAddress || null,
         email: userdata?.email || null,
         name: userdata?.name || null,
       };
